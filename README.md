@@ -63,5 +63,13 @@
 ## Hướng dẫn cài K8s
 ##### Sử dụng Kubespray 
 - Kubespray là một công cụ mã nguồn mở dùng để triển khai Kubernetes trên nhiều môi trường khác nhau (bare-metal, cloud, VM). Nó sử dụng Ansible để tự động hóa quá trình cài đặt và cấu hình cluster Kubernetes.
-- Hướng dẫn cài xem tại .
+- Hướng dẫn cài xem [tại đây](https://github.com/hoanghung91019999/K8s/new/mai)
+
+##### sử dụng kubeadm
+- Kubeadm là một công cụ chính thức của Kubernetes giúp cài đặt và cấu hình một cluster Kubernetes một cách đơn giản và nhanh chóng. Nó tự động thực hiện các bước cần thiết để thiết lập một cluster tối giản nhưng hoạt động được, bao gồm:
+    + Tạo control-plane (API Server, Controller, Scheduler, v.v.)
+    + Kết nối các worker node vào cluster
+    + Cấu hình các chứng chỉ TLS & token bảo mật
+    + Thiết lập networking cơ bản (DNS, CNI)
+- hướng dẫn cài đặt xem tại đây
     
