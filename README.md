@@ -60,5 +60,8 @@
 ![image](https://github.com/user-attachments/assets/ae5a1d98-fb39-42a7-b3c0-bd93f3fb92f8)
 - quy trình làm việc
   + API nhận yêu cầu từ admin --> API server đi hỏi scheduler deploy lên worker node nào --> scheduler không thể đi hỏi từng worker note ( vì trong cluster có thể có hàng trăm worker note). scheduler lấy dữ liệu từ ETCD xem hiện tại worker node nào phù hợp chỉ định deploy lên worker node nào --> lúc này scheduler thông tin lại cho API server --> API server sẽ giao tiếp với kubelet trên worker node đó và deploy pod lên worker node
-
+## Hướng dẫn cài K8s
+##### Sử dụng Kubespray 
+- Kubespray là một công cụ mã nguồn mở dùng để triển khai Kubernetes trên nhiều môi trường khác nhau (bare-metal, cloud, VM). Nó sử dụng Ansible để tự động hóa quá trình cài đặt và cấu hình cluster Kubernetes.
+- Hướng dẫn cài xem tại .
     
