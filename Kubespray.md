@@ -47,13 +47,16 @@ dnf install -y python3 python3-pip
 dnf install -y epel-release
 dnf install -y ansible git
 ```
-- chú ý version của ansible
 - Clone repo Kubespray
 ```
 git clone https://github.com/kubernetes-sigs/kubespray.git
 cd kubespray
 git checkout release-2.22  # Chọn phiên bản phù hợp với K8s
 ```
+- chú ý version của ansible
+    + khi lựa chọn version của kubespray sẽ tương thích với 1 số version của ansible và python 
+      ![image](https://github.com/user-attachments/assets/c41d92b6-b98f-43f1-a45c-adb6f07199ad)
+
 - Cài đặt các Python dependencies
 - Kubespray là một bộ công cụ Ansible-based để triển khai Kubernetes. Do đó, nó phụ thuộc vào Python và các thư viện Python để thực hiện các tác vụ tự động hóa trên các node. Nếu không cài đặt đầy đủ dependencies, quá trình triển khai có thể bị lỗi.
 - Các module Python hỗ trợ Kubespray hoạt động đúng
