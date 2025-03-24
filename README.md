@@ -73,3 +73,125 @@
     + Thiết lập networking cơ bản (DNS, CNI)
 - hướng dẫn cài đặt xem tại đây
     
+# Pod là gì
+- Pod là đơn vị nhỏ nhất trong Kubernetes, chứa một hoặc nhiều container chạy cùng nhau trên một node.
+- Tất cả các container trong pod sẽ:
+      + Chia sẻ network namespace (cùng địa chỉ IP)
+      + Chia sẻ storage volumes (nếu có).
+      + Có thể giao tiếp với nhau thông qua localhost.
+- Mỗi pod có một địa chỉ IP duy nhất trong cluster.
+- Các pod giao tiếp với nhau qua Service hoặc DNS nội bộ.
+- Các container trong pod giao tiếp với nhau qua localhost.
+- Các container trong pod có thể chia sẻ Persistent Volume để lưu trữ dữ liệu.
+- Kiểm tra danh sách các pods đang chạy
+```
+kubectl get pods
+```
+- Xem thông tin chi tiết về một pod
+```
+kubectl describe pod <tên-pod>
+```
+- Tạo một pod từ file YAML ,Ví dụ, tạo một file pod.yaml với nội dung:
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-container
+      image: nginx
+      ports:
+        - containerPort: 80
+chạy lệnh: 
+kubectl apply -f pod.yaml
+```
+- Xóa một pod
+```
+kubectl delete pod <tên-pod>
+```
+- Kiểm tra logs của container trong pod
+```
+kubectl logs <tên-pod>
+```
+- Nếu pod có nhiều container, chỉ định container cụ thể:
+```
+kubectl logs <tên-pod> -c <tên-container>
+```
+- Truy cập vào container trong pod
+```
+kubectl exec -it <tên-pod> -- /bin/sh
+```
+-  Forward port từ pod ra ngoài
+```
+kubectl port-forward pod/<tên-pod> 8080:80
+```
+- Kiểm tra trạng thái pod liên tục
+```
+kubectl get pods --watch
+```
+- Lấy thông tin pod dưới dạng YAML
+```
+kubectl get pod <tên-pod> -o yaml
+```
+- Debug pod nếu bị lỗi (CrashLoopBackOff, Pending, etc.)
+```
+kubectl describe pod <tên-pod>
+kubectl logs <tên-pod>
+```
+# nodeport
+- NodePort là một loại Service trong Kubernetes, giúp mở một cổng trên tất cả các Node trong cluster, cho phép truy cập từ bên ngoài vào Pod.
+- Nguyên lý hoạt động:
+    + Kubernetes tự động mở một cổng trên tất cả các node (ví dụ: 30000-32767).
+    + Khi có request đến NodeIP:NodePort, Kubernetes sẽ forward request đó đến Pod bên trong cluster.
+- cấu trúc kết nối
+```
+Client --> NodeIP:NodePort --> Service --> Pod
+```
+- Cấu hình NodePort trong Kubernetes
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  type: NodePort
+  selector:
+    app: my-app
+  ports:
+    - protocol: TCP
+      port: 80         # Cổng trong cluster
+      targetPort: 8080 # Cổng của container (Pod)
+      nodePort: 30080  # Cổng mở trên Node (tùy chọn, nếu không chỉ định, Kubernetes sẽ chọn tự động)
+```
+- chạy lệnh
+```
+kubectl apply -f service-nodeport.yaml
+```
+-  Xem danh sách Service trong cluster
+```
+kubectl get svc
+```
+- Xem chi tiết Service cụ thể
+```
+kubectl describe svc my-service
+```
+- xóa service
+```
+kubectl delete svc my-service
+```
+# logs
+- xem logs
+```
+kubectl logs < name pods >
+```
+- sử dụng exec
+```
+kubectl exec -it <pod_name> -- <command>
+```
+# declarative 
+- sử dụng tài liệu trên kubernetes.io
+# replicaset
+
+                                                                                                                                                                                                                                                                                                 
+
