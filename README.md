@@ -192,6 +192,161 @@ kubectl exec -it <pod_name> -- <command>
 # declarative 
 - sử dụng tài liệu trên kubernetes.io
 # replicaset
+- ReplicaSet (RS) là một tài nguyên trong Kubernetes giúp đảm bảo rằng một số lượng cố định của Pod luôn chạy trong cluster. Nó đảm nhiệm vai trò duy trì trạng thái mong muốn bằng cách tự động tạo thêm hoặc xóa bớt Pod khi cần thiết.
+- ReplicaSet bao gồm 3 phần chính:
+    + Số lượng Replica (replicas): Xác định số lượng Pod mong muốn.
+    + Selector: Định danh các Pod mà ReplicaSet sẽ quản lý.
+    + Template: Mẫu Pod sẽ được ReplicaSet tạo ra khi cần.
+- Vòng đời hoạt động
+     + bước 1 : ReplicaSet kiểm tra số lượng Pod : Khi ReplicaSet được tạo, nó sẽ kiểm tra trong cluster xem có bao nhiêu Pod khớp với selector của nó.
+     + Bước 2: Điều chỉnh số lượng Pod : Nếu số Pod ít hơn giá trị replicas → ReplicaSet tạo thêm Pod.Nếu số Pod nhiều hơn giá trị replicas → ReplicaSet xóa bớt Pod.
+     + Bước 3: Theo dõi và tự động cân bằng. Nếu một Pod bị xóa hoặc gặp lỗi → ReplicaSet sẽ tự động tạo Pod mới để thay thế.Nếu tài nguyên hệ thống bị thiếu → ReplicaSet cố gắng duy trì số Pod gần với giá trị replicas nhất có thể.
 
+- ví dụ :
+```
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicaset
+spec:
+  replicas: 3  # Số lượng Pod mong muốn
+  selector:
+    matchLabels:
+      app: nginx  # Chỉ quản lý các Pod có label "app=nginx"
+  template:
+    metadata:
+      labels:
+        app: nginx  # Label để Pod được quản lý bởi ReplicaSet này
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+```
+- Label là các cặp key-value được gán cho đối tượng (Pod, Node, Service, ReplicaSet, v.v.).
+- Selector được dùng để tìm kiếm và chọn lọc các đối tượng có label phù hợp.
+- Expose ReplicaSet giúp tạo Service để truy cập các Pod.
+
+# deployment
+- Deployment là một tài nguyên trong Kubernetes giúp quản lý ReplicaSet và Pod. Nó cung cấp các tính năng như:
+    +  Tự động triển khai (deploy) các Pod.
+    +  Cập nhật phiên bản ứng dụng mà không làm gián đoạn dịch vụ.
+    +  Khôi phục (rollback) về phiên bản trước nếu có lỗi.
+    +  Tự động thay đổi số lượng Pod (scaling) theo nhu cầu.
+- Thành phần chính
+    + ReplicaSet: Đảm bảo số lượng Pod luôn chạy đúng với mong muốn.
+    + Pod Template: Mẫu Pod chứa cấu hình về container, image, ports, v.v.
+    + Strategy (Chiến lược triển khai): Cách cập nhật Pod khi có thay đổi.
+- Vòng đời hoạt động
+    + tạo Deployment → Kubernetes tạo ReplicaSet quản lý các Pod.
+    + Kiểm tra số lượng Pod → ReplicaSet tạo đúng số Pod theo replicas.
+    + Cập nhật Deployment → Triển khai phiên bản mới theo chiến lược cập nhật.
+    + Rollback nếu lỗi → Nếu phát hiện lỗi, có thể quay lại phiên bản trước.
+    +  Tự động sửa lỗi → Nếu một Pod bị lỗi, ReplicaSet sẽ tạo Pod mới thay thế.
+- ví dụ :
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3  # Số lượng Pod mong muốn
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+```
+- triển khai
+```
+kubectl apply -f deployment.yaml
+```
+- Kiểm tra Deployment
+```
+kubectl get deployments
+kubectl get pods -o wide
+```
+- Kiểm tra ReplicaSet
+```
+kubectl get rs
+```
+- Cập nhật Image của Deployment
+```
+kubectl set image deployment/nginx-deployment nginx=nginx:1.21
+```
+- **Kubernetes sẽ thực hiện Rolling Update, thay thế từng Pod một.**
+- Kiểm tra quá trình cập nhật
+```
+kubectl rollout status deployment/nginx-deployment
+kubectl get pods
+```
+### Chiến lược cập nhật Deployment
+- Rolling Update (Mặc định)
+    + Thay thế từng Pod một, không ảnh hưởng đến ứng dụng.
+    + Kubernetes tạo Pod mới trước khi xóa Pod cũ.
+- Cấu hình trong YAML:
+```
+strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1  # Số lượng Pod bị mất tối đa
+    maxSurge: 1        # Số lượng Pod mới được tạo thêm tối đa
+```
+- Recreate (Xóa hết Pod cũ, tạo Pod mới)
+    + Toàn bộ Pod cũ sẽ bị xóa trước, sau đó Pod mới được tạo.
+    + Dẫn đến downtime nếu không có cơ chế dự phòng.
+- Cấu hình trong YAML:
+```
+strategy:
+  type: Recreate
+```
+- Dùng khi nào?
+    + Khi ứng dụng không hỗ trợ chạy song song nhiều phiên bản cùng lúc.
+    + Khi có thay đổi lớn về cấu trúc dữ liệu.
+- **Rollback (Quay lại phiên bản cũ)**
+- Kiểm tra lịch sử Deployment
+```
+kubectl rollout history deployment/nginx-deployment
+```
+- Quay lại phiên bản trước
+```
+kubectl rollout undo deployment/nginx-deployment
+```
+### Expose Deployment bằng Service
+- Dùng kubectl expose
+```
+kubectl expose deployment nginx-deployment --type=NodePort --port=80
+```
+- xóa Deployment
+```
+kubectl delete deployment nginx-deployment
+```
+##### lưu ý 
+- không cần tạo ReplicaSet trước!
+- Khi bạn tạo Deployment, Kubernetes tự động tạo ReplicaSet để quản lý các Pod.
+-  Bạn không cần khai báo ReplicaSet riêng, vì Deployment đã bao gồm cơ chế này.
+  ### *Khi nào nên dùng ReplicaSet mà không cần Deployment?*
+-  Trong thực tế, luôn dùng Deployment trừ khi bạn cần: ✔ Chạy Pod cố định mà không cần cập nhật tự động.
+-   Có một hệ thống quản lý Deployment riêng. Nhưng hầu hết các trường hợp, bạn chỉ cần Deployment.
+
+# service 
+![image](https://github.com/user-attachments/assets/b12a0844-30cf-4b62-b63c-459ee3758f92)
+
+
+
+
+
+
+
+  
                                                                                                                                                                                                                                                                                                  
 
