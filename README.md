@@ -340,6 +340,76 @@ kubectl delete deployment nginx-deployment
 
 # service 
 ![image](https://github.com/user-attachments/assets/b12a0844-30cf-4b62-b63c-459ee3758f92)
+- kube proxy giúp các pod ( container trong các pod )  giao tiếp với nhau trong 1 node và pod giữa các node
+- mỗi service trên k8s sẽ có 1 IP , IP này sẽ đi kèm với dịch vụ suốt quá trình vận hành
+- service giúp cân bằng tải ( ví dụ service 1 có 2 pod hệ thống sẽ tự động cân bằng tải )
+- cấu trúc tạo service
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+```
+- nếu type khoogn định nghĩa loại service sẽ mặc định là cluster IP
+##### cluster IP 
+- các pod có thể dược redeploy và địa chỉ IP của pod thay đổi
+- cluster IP sẽ cấp 1 địa chỉ IP vĩnh viễn
+- Bất kỳ Pod nào trong cluster có thể gọi tên Service (  myapp-service ) để gửi request thay vì gọi trực tiếp IP của Pod.
+- Kubernetes sử dụng iptables hoặc IPVS để load balance request đến các Pod đang chạy.
+- khi không có cluster IP các pod vẫn có thể giao tiếp với nhau bằng IP của pod hoặc sử dụng core DNS là name của pod ( 2 cách này phức tạp và ko tối ưu )
+##### nodeport 
+- nodeport sẽ Cấp phát một cổng ngẫu nhiên từ 30000-32767 trên mỗi Node trong cluster
+- Mọi request đến <NodeIP>:<NodePort> sẽ được chuyển tiếp đến Pod đích.
+- ví dụ có 3 node và bạn muốn truy cập vào 1 pod nằm ở 1 trong 3 node này chỉ cần điền đúng port đã được mở ra bên ngoài k8s sẽ tự biết và định tuyến đến đúng pod đó
+- Nhận request trên NodePort --> Forward request đến ClusterIP của Service. --> Service tiếp tục load balance request đến một Pod backend.
+- cấu trúc :
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-service
+spec:
+  selector:
+    app: myapp
+  ports:
+    - protocol: TCP
+      port: 80           # Service lắng nghe trên cổng 80 (ClusterIP)
+      targetPort: 8080   # Chuyển tiếp request đến cổng 8080 của Pod
+      nodePort: 30080    # Mở cổng 30080 trên tất cả các Node (nếu không chỉ định, Kubernetes sẽ tự động chọn một cổng từ 30000-32767)
+  type: NodePort
+```
+##### loadbalancer
+- chỉ hỗ trợ ở môi trường cloud ( dưới onpremis có thể sử dụng các tool HAproxy ,MetalLB , Ingress Controller
+- ![image](https://github.com/user-attachments/assets/f6f6cb2e-110b-47d8-9391-5bf91ee9553e)
+- Khi bạn tạo một Service kiểu LoadBalancer, Kubernetes sẽ yêu cầu nhà cung cấp cloud tạo một IP công cộng và load balancer.
+- Load balancer này sẽ forward lưu lượng đến các Pod trong cluster thông qua IP và port của Service.
+- Kubernetes sẽ sử dụng Round Robin hoặc các thuật toán load balancing khác để phân phối lưu lượng đến các Pod backend.
+##### externalname 
+- k8s sẽ tạo 1 dns name và chuyển tiếp tới 1 domain name bên ngoài cluster
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-external-api
+spec:
+  type: ExternalName
+  externalName: api.example.com
+```
+- khi Pod gọi my-external-api, Kubernetes sẽ tự động chuyển tiếp yêu cầu đến api.example.com.
+
+
+
+
+
+
 
 
 
