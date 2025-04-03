@@ -405,11 +405,87 @@ spec:
 ```
 - khi Pod gọi my-external-api, Kubernetes sẽ tự động chuyển tiếp yêu cầu đến api.example.com.
 
-
-
-
-
-
+# Namespaces
+- Trong Kubernetes, Namespace là một cách để tách biệt các tài nguyên trong cùng một cluster
+- Mỗi Namespace có thể chứa các Pod, Service, Deployment, và các tài nguyên khác, giúp bạn dễ dàng phân chia, quản lý và kiểm soát các nhóm tài nguyên khác nhau trong cluster.
+- Đây là một công cụ rất hữu ích khi bạn muốn phân chia tài nguyên, tổ chức cluster, và giảm thiểu xung đột giữa các ứng dụng hoặc môi trường khác nhau.
+#### Kiến trúc và Cách thức Hoạt động của Namespaces trong Kubernetes
+- Mỗi Namespace là một không gian logic:
+    + Các tài nguyên trong Kubernetes như Pods, Services, Deployments, Secrets, và ConfigMaps đều có thể được chỉ định vào một namespace cụ thể.
+    + Mỗi namespace là một không gian riêng biệt, với tài nguyên của nó không ảnh hưởng trực tiếp đến các namespace khác.
+- Mặc định không có Namespace:
+    + Khi bạn không chỉ định một namespace, Kubernetes sẽ tự động gán tài nguyên đó vào namespace mặc định (default).
+- Tài nguyên không thể trùng tên giữa các namespaces:
+    + Trong cùng một namespace, bạn không thể có hai tài nguyên có cùng tên. Tuy nhiên, các tài nguyên có thể có cùng tên nhưng nằm trong các namespaces khác nhau.
+- Tài nguyên trong namespace có thể giao tiếp với nhau:
+    + Pods trong một namespace có thể giao tiếp với nhau thông qua tên dịch vụ hoặc các tài nguyên khác mà không cần cấu hình phức tạp.
+- Kết nối giữa các namespaces:
+    + Nếu bạn muốn các tài nguyên trong một namespace giao tiếp với tài nguyên trong namespace khác, bạn cần chỉ định namespace trong các truy vấn (ví dụ: thông qua DNS hoặc các service discovery).
+#### tạo namespace
+- tạo namespace
+```
+kubectl create namespace <namespace-name>
+```
+- tạo bằng file yml
+```
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: development
+```
+- deploy pod vào namespace
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+  namespace: development
+spec:
+  containers:
+  - name: mycontainer
+    image: myimage
+```
+- deploy pod vào name space và service
+```
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: appv1
+  namespace: development
+  lables:
+    app: app1
+spec:
+  replicaset: 3
+  selecttor:
+    matchLabels:
+        app: app1
+  template:
+    metadata:
+        labels:
+            app: app1
+    spec:
+      containers:
+        - name: simple-app
+          image: demo/app
+          port:
+            - containerPort: 8080    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodeport
+  namespace: development      
+  lables:
+    app: app1
+spec:
+  type: Nodeport
+  selector:
+    app: app1
+ ports:
+   - port: 8080
+     targetPort : 8080
+```
+             
 
 
 
