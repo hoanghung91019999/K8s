@@ -502,6 +502,7 @@ kubectl get pod <pod-name> -n <namespace-name>
 kubectl get all -n <namespace-name>
 ```
 - Để liệt kê Pods trong tất cả các namespaces
+```
 kubectl get pods --all-namespaces
 ```
 
