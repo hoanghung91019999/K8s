@@ -485,7 +485,26 @@ spec:
    - port: 8080
      targetPort : 8080
 ```
-             
+- liệt kê namespace
+```
+kubectl get namespaces
+```
+- liệt kê các Pods trong một namespace cụ thể
+```
+kubectl get pods -n <namespace-name>
+```
+- lấy thông tin về Pod
+```
+kubectl get pod <pod-name> -n <namespace-name>
+```
+- Để liệt kê tất cả tài nguyên (Pods, Deployments, Services, v.v.) trong một namespace
+```
+kubectl get all -n <namespace-name>
+```
+- Để liệt kê Pods trong tất cả các namespaces
+kubectl get pods --all-namespaces
+```
+
 
 
 
