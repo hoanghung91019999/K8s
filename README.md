@@ -823,6 +823,9 @@ sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 
 # "Ghim" version — không cho tự động upgrade
+Client Version: v1.30.14
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
+
 # (Upgrade K8s cần làm có kế hoạch, không nên để tự động)
 sudo apt-mark hold kubelet kubeadm kubectl
 
@@ -844,9 +847,9 @@ kubectl version --client
 # --pod-network-cidr: Dải IP nội bộ cho các Pod (dùng cho Calico)
 # --apiserver-advertise-address: IP của máy master
 sudo kubeadm init \
-  --pod-network-cidr=10.244.0.0/16 \
-  --apiserver-advertise-address=192.168.1.10 \
-  --control-plane-endpoint=192.168.1.10
+  --pod-network-cidr=10.10.20.0/16 \
+  --apiserver-advertise-address=192.168.200.80 \
+  --control-plane-endpoint=192.168.200.80
 ```
 
 **Giải thích các tham số:**
