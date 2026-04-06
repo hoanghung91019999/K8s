@@ -661,9 +661,9 @@ sudo hostnamectl set-hostname worker-02
 sudo tee -a /etc/hosts <<EOF
 
 # Kubernetes Cluster
-192.168.1.10  master-01
-192.168.1.11  worker-01
-192.168.1.12  worker-02
+192.168.200.80  master-01
+192.168.200.81  worker-01
+192.168.200.82  worker-02
 EOF
 ```
 
