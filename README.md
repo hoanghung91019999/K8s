@@ -1017,7 +1017,7 @@ metadata:
   namespace: metallb-system
 spec:
   addresses:
-  - 192.168.1.200-192.168.1.250  # <-- Thay bằng dải IP trống trong LAN của bạn
+  - 192.168.200.85-192.168.200.90  # <-- Thay bằng dải IP trống trong LAN của bạn
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
